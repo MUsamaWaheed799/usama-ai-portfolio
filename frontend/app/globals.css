@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 4%;
+  --card: 0 0% 100%;
+  --border: 240 6% 90%;
+  --primary: 258 90% 60%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+}
+
+.dark {
+  --background: 240 15% 6%;
+  --foreground: 0 0% 98%;
+  --card: 240 12% 10%;
+  --border: 240 8% 18%;
+  --primary: 258 90% 66%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 240 8% 14%;
+  --muted-foreground: 240 5% 65%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+}
+
+.glass {
+  backdrop-filter: blur(16px);
+  background: linear-gradient(
+    to bottom right,
+    hsl(var(--card) / 0.7),
+    hsl(var(--card) / 0.4)
+  );
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
+.gradient-text {
+  background: linear-gradient(to right, hsl(258 90% 66%), hsl(280 85% 65%), hsl(200 90% 60%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-glow {
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, hsl(258 90% 60% / 0.25), transparent 70%);
+}
