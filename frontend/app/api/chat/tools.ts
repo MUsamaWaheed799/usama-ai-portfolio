@@ -1,3 +1,10 @@
+import { tool } from "ai";
+import { z } from "zod";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// Real function that talks to Railway FastAPI backend
 export async function searchKnowledgeExecute(query: string) {
   try {
     const response = await fetch(`${API_URL}/api/chat`, {
@@ -41,3 +48,17 @@ export async function searchKnowledgeExecute(query: string) {
     throw error;
   }
 }
+
+// AI SDK Tool
+export const searchKnowledge = tool({
+  description:
+    "Search Usama's knowledge base to answer questions about his projects, skills, education, internship and experience.",
+
+  inputSchema: z.object({
+    query: z.string().describe("The user's question about Usama."),
+  }),
+
+  execute: async ({ query }) => {
+    return searchKnowledgeExecute(query);
+  },
+});
