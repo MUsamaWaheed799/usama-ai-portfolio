@@ -48,11 +48,6 @@ export function ChatWidget() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  /*
-   * Automatically open the existing AI Assistant
-   * when the "Ask Usama AI" button is clicked
-   * from the AI Neural Core section.
-   */
   useEffect(() => {
     const openChat = () => {
       setOpen(true);
@@ -65,9 +60,6 @@ export function ChatWidget() {
     };
   }, []);
 
-  /*
-   * Keep the conversation scrolled to the latest message.
-   */
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
@@ -100,7 +92,10 @@ export function ChatWidget() {
         },
         body: JSON.stringify({
           message: question,
-          history: nextMessages
+
+          // Send only previous conversation messages.
+          // The current question is already sent separately as `message`.
+          history: messages
             .filter((m) => !m.error)
             .slice(-6)
             .map((m) => ({
@@ -111,7 +106,19 @@ export function ChatWidget() {
       });
 
       if (!res.ok) {
-        throw new Error(`Request failed with status ${res.status}`);
+        let errorMessage = `Request failed with status ${res.status}`;
+
+        try {
+          const errorData = await res.json();
+
+          if (errorData?.detail) {
+            errorMessage = errorData.detail;
+          }
+        } catch {
+          // Keep the default error message.
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data = await res.json();
@@ -126,6 +133,8 @@ export function ChatWidget() {
         },
       ]);
     } catch (err) {
+      console.error("Chat request failed:", err);
+
       setMessages((prev) => [
         ...prev,
         {
@@ -288,4 +297,3 @@ export function ChatWidget() {
     </>
   );
 }
-
