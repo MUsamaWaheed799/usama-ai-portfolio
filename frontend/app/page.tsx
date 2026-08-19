@@ -1,24 +1,7 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { ArrowRight, Github, Linkedin, Sparkles } from "lucide-react";
 import { profile } from "@/lib/profile";
-
-const AIExperience = dynamic(
-  () => import("@/components/AI3D/AIExperience"),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="flex h-[280px] w-full items-center justify-center rounded-2xl border border-border bg-muted/20 sm:h-[360px] lg:h-[420px]"
-        aria-label="Loading AI experience"
-      >
-        <div className="text-sm text-muted-foreground">
-          Loading AI experience...
-        </div>
-      </div>
-    ),
-  }
-);
+import AIExperienceLoader from "@/components/AI3D/AIExperienceLoader";
 
 export default function HomePage() {
   return (
@@ -133,7 +116,7 @@ export default function HomePage() {
           AI Experience
         </h2>
 
-        <AIExperience />
+        <AIExperienceLoader />
       </section>
 
       {/* AI Assistant */}
