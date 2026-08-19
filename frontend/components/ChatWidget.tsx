@@ -32,8 +32,6 @@ const SUGGESTED = [
   "Why should we hire Usama?",
 ];
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
 
@@ -50,13 +48,32 @@ export function ChatWidget() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  /*
+   * Automatically open the existing AI Assistant
+   * when the "Ask Usama AI" button is clicked
+   * from the AI Neural Core section.
+   */
+  useEffect(() => {
+    const openChat = () => {
+      setOpen(true);
+    };
+
+    window.addEventListener("open-ai-chat", openChat);
+
+    return () => {
+      window.removeEventListener("open-ai-chat", openChat);
+    };
+  }, []);
+
+  /*
+   * Keep the conversation scrolled to the latest message.
+   */
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
     });
   }, [messages, open, loading]);
-
 
   async function sendMessage(text: string) {
     const question = text.trim();
@@ -93,14 +110,11 @@ export function ChatWidget() {
         }),
       });
 
-
       if (!res.ok) {
         throw new Error(`Request failed with status ${res.status}`);
       }
 
-
       const data = await res.json();
-
 
       setMessages((prev) => [
         ...prev,
@@ -111,9 +125,7 @@ export function ChatWidget() {
           tool: "output",
         },
       ]);
-
     } catch (err) {
-
       setMessages((prev) => [
         ...prev,
         {
@@ -124,30 +136,28 @@ export function ChatWidget() {
           tool: "error",
         },
       ]);
-
     } finally {
       setLoading(false);
     }
   }
-
 
   return (
     <>
       {/* Launcher */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
-        aria-label="Open Usama AI Assistant"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
+        aria-label={
+          open ? "Close Usama AI Assistant" : "Open Usama AI Assistant"
+        }
       >
         {open ? <X size={22} /> : <MessageCircle size={22} />}
       </button>
 
-
       {open && (
         <div className="glass fixed bottom-24 right-6 z-50 flex h-[32rem] w-[22rem] flex-col rounded-2xl shadow-2xl sm:w-96">
-
+          {/* Header */}
           <div className="flex items-center gap-2 border-b border-border/60 px-4 py-3">
-
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary">
               <Bot size={16} />
             </div>
@@ -158,21 +168,17 @@ export function ChatWidget() {
               </p>
 
               <p className="text-xs text-muted-foreground">
-                Grounded in Usama's real profile data
+                Grounded in Usama&apos;s real profile data
               </p>
             </div>
-
           </div>
 
-
-
+          {/* Messages */}
           <div
             ref={scrollRef}
             className="flex-1 space-y-3 overflow-y-auto px-4 py-3"
           >
-
             {messages.map((m, i) => (
-
               <div
                 key={i}
                 className={cn(
@@ -182,31 +188,21 @@ export function ChatWidget() {
                     : "justify-start"
                 )}
               >
-
                 <div
                   className={cn(
                     "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
-
                     m.role === "user"
                       ? "bg-primary text-primary-foreground"
-
                       : m.error
                         ? "bg-red-500/10 text-red-400"
-
                         : "bg-muted text-foreground"
                   )}
                 >
-
-
-                  {m.tool === "loading" && (
-                    <ToolLoading />
-                  )}
-
+                  {m.tool === "loading" && <ToolLoading />}
 
                   {m.tool === "input" && (
                     <ToolInput question={m.content} />
                   )}
-
 
                   {m.tool === "summary" && (
                     <KnowledgeSummaryCard
@@ -215,60 +211,42 @@ export function ChatWidget() {
                     />
                   )}
 
-
                   {m.tool === "output" && (
                     <ToolOutput message={m.content} />
                   )}
-
 
                   {m.tool === "error" && (
                     <ToolError message={m.content} />
                   )}
 
-
                   {!m.tool && (
                     <>
                       {m.content}
 
-                      {m.sources &&
-                        m.sources.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1 border-t border-border/60 pt-2">
-
-                            {m.sources.map((s, idx) => (
-
-                              <span
-                                key={idx}
-                                className="rounded-full bg-background/60 px-2 py-0.5 text-[10px] text-muted-foreground"
-                              >
-                                {s.source}
-                              </span>
-
-                            ))}
-
-                          </div>
-                        )}
-
+                      {m.sources && m.sources.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1 border-t border-border/60 pt-2">
+                          {m.sources.map((s, idx) => (
+                            <span
+                              key={idx}
+                              className="rounded-full bg-background/60 px-2 py-0.5 text-[10px] text-muted-foreground"
+                            >
+                              {s.source}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </>
                   )}
-
                 </div>
-
               </div>
-
             ))}
-
-
 
             {loading && <ToolLoading />}
 
-
-
+            {/* Suggested questions */}
             {messages.length === 1 && (
-
               <div className="flex flex-wrap gap-2 pt-2">
-
                 {SUGGESTED.map((s) => (
-
                   <button
                     key={s}
                     onClick={() => sendMessage(s)}
@@ -276,17 +254,12 @@ export function ChatWidget() {
                   >
                     {s}
                   </button>
-
                 ))}
-
               </div>
-
             )}
-
           </div>
 
-
-
+          {/* Input */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -294,14 +267,12 @@ export function ChatWidget() {
             }}
             className="flex items-center gap-2 border-t border-border/60 p-3"
           >
-
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about Usama's experience…"
               className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus:border-primary"
             />
-
 
             <button
               type="submit"
@@ -311,14 +282,10 @@ export function ChatWidget() {
             >
               <Send size={15} />
             </button>
-
-
           </form>
-
-
         </div>
       )}
-
     </>
   );
 }
+
